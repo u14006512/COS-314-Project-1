@@ -1,0 +1,137 @@
+Game Design: Trimok
+
+
+The Game has 3 modes: HvH,HvAI,AIvAI
+
+This is determined by the option selection in the opening screen.
+
+There should be a game class that contains the essential components of the game.
+
+The game is played as a series of discrete events. 
+
+Game Start
+->Game Mode Selection
+
+->Blue Selection (Random Chance)
+->Other player disabled while you are able to make your move. ->enabled when valid move is submitted.
+
+While (Game Unwon --Moves can still be made)
+{
+	Receive Move from Blue Player
+		while (Move Not Valid)
+		{
+		->Process move for validity
+		->Indicate to user the reason for invalid move
+			1)Too far
+			2)Friendly Cell
+			3)Incorrect Capture
+		}
+	Valid Move Received
+		->Modify Game board to reflect this
+		->Remove Previous game object.
+		->Move the moving game object to the old object's position.
+
+	Check the state of the game 
+	--Is the game won?
+	END if so, otherwise carry on
+
+	Receive Move from Blue Player
+		while (Move Not Valid)
+		{
+		->Process move for validity
+		->Indicate to user the reason for invalid move
+			1)Too far
+			2)Friendly Cell
+			3)Incorrect Capture
+		}
+	Valid Move Received
+		->Modify Game board to reflect this
+		->Remove Previous game object.
+		->Move the moving game object to the old object's position.
+
+	The game will continue after the while loop if it can.	
+}
+
+The Interface
+Needs
+1)A physical list of all player tokens currently on the board
+2)A list of all of the move cells
+
+We can possible store this information inside the Game Class
+->At world instantiation, we hand the game a list of all of the cells and player tokens.
+
+The game will manage this list and send it to the interface so that the interface can update the game board? -> can we do that?
+
+The Game may need
+Variables
+1) A 2D matrix representing the board
+	->Enables move validity checking
+2) A list of the remaining stacks for each player	
+
+
+Functions
+bool validateMove(String move)
+->Receives the move from the submit button
+->checks if the move is valid
+->if so, returns true.
+
+What constitutes a valid move?
+-The source move token must be in the list of tokens left for the side
+-The destination move token must be in the list of tokens left for the side
+-the source move must be on the board
+-the destination move must be on the board
+-the cell is either empty or the replacement move is a valid one according to the rules for replacement 3->2->1->3
+
+Matrix
+->void initialiseMatrix()->set up the matrix of strings 
+	->{3-1}{A-F}{1-6}{B/R}-{Stack Size}{COL}{ROW}{Side}
+->string getCell(int a,int b)-> returns the cell at those coordinates
+->setCell(string, int a,int b) ->modifies a cell at that location
+->validateTurn(srcMove,destMove)->checks if the whole player is indeed valid.
+
+
+   /* Code to transplant 1 token onto the position of another token.
+    int x,y;
+    
+    x=a.getX();
+    y=a.getY();
+    b.getParent().setPreferredSize(b.getParent().getPreferredSize());
+    a.getParent().setPreferredSize(a.getParent().getPreferredSize());
+    
+    a.setVisible(false);
+    JComponent tmp=(JComponent) b.getParent().getComponent(0);
+    b.getParent().remove(0);
+    a.getParent().add(tmp);
+    */
+
+A Discussion of AI Integration
+
+Against human players, the scheme operates as per normal, but against AI, we need to adapt the mechanism slightly.
+
+The interface will change to allow for players to make the AI make a move.
+
+During the main loop that runs the game logic, whether the kind of move submitted depends on the nature of the match
+
+While (Game Unwon --Moves can still be made)
+{
+	1)Receive Move from Blue Player
+
+
+
+	Valid Move Received
+	AI MOVE -> consults the underlying game tree to produce a move to process?
+	SUBMIT MOVE
+	->processes the user input.
+
+	Check the state of the game 
+	--Is the game won?
+	END if so, otherwise carry on
+
+	2) Receive Move from Blue Player
+	AI MOVE -> consults the underlying game tree to produce a move to process?
+	SUBMIT MOVE
+	->processes the user input.
+
+	Valid Move Received
+	The game will continue after the while loop if it can.	
+}

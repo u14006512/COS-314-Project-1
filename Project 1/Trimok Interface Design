@@ -1,0 +1,349 @@
+Trimok Interface Design
+
+The Trimok board 
+
+A 6x6 panel board that has draggable pieces
+
+Stack size is indicated with a physically larger, or smaller stack
+Illegal moves are disallowed and the drag and drop operation will fail.
+
+
+
+Game Interface
+
+The Game will start with the dialog box asking for the user to select their game type
+
+Human v Human
+Human v AI
+AI v AI
+
+General Function of System
+
+The game will be contained essentially inside of a while loop that will check for the win condition(s) and halt the game when that occurs.
+
+Win Condition(s):
+
+1) The opponent has no remaining stacks
+	->Stacks kept in some kind of list for each player?
+
+2) The opponent cannot move any of their pieces.
+
+3) Draw condition?
+	->>Total loss of stack type
+	
+	->If I lose 2 stack types and he has the counter to my remaining type, I'll lose.
+
+	-> Losing a single stack type increases the chances of a draw since I can counter 2 types but the 3rd I cannot
+
+	User Input & Response
+
+	The user has a Source and Move Option
+
+	The input is in the following format:
+	Source{COL}{ROW}:{A-F}{1-6} A1
+	Destination {COL}{ROW}:{A-F}{1-6} A2
+
+	The specific button will append to that string the side of the move.
+
+	So if Red moves, A1R will be sent as source.
+
+	The board is in the format {Stack Size}{COL}{ROW}{Side}
+
+	The Destination will not need an append value since it needs to determine the nature of the move.
+
+	->It will have to check what is at the location specified at the destination location 
+		->If it is empty {-}
+		->Or host to a piece {!-}
+		->It wil also need to determine what is at the Source location.
+
+
+Validation Protocol
+The protocol will receive the Source and Destination Move 
+Source Format: {COL}{ROW}:{A-F}{1-6}{R/B}
+Destination Format: {COL}{ROW}:{A-F}{1-6}
+
+Board Format:{Stack Size}{COL}{ROW}{Side}
+
+//////////You will send the co-ordinates
+
+We need to determine the following things.
+1.
+1) If Source refers to a valid space on the board (Non-existent entries are also checked {Text ! blank})
+2) If Destination refers to a valid space on the board
+->Check if {COL} in {A-F} and Check if {ROW} in {1-6} on both
+
+NOT: "Your move must refer to a valid space on the board"
+
+2.
+If Source refers to a piece that is on the side included in Source
+->Check if {Side} =={R/B}
+NOT: "You may only move pieces of your side"
+
+3. We need to check if the destination move is within the valid move range or list of allowable moves.
+
+1)Up Move: 1 Space Up
+
+2)Down Move: 1 Space Down
+
+3)Left Move: 1 Space to the Left
+
+4)Right Move: 1 Space to the Right
+
+5)Diagonally Up-Left: 1 Space Up-Left
+
+6)Diagonally Up-Right: 1 Space Up-Right
+
+7)Diagonally Down-Left: 1 Space Down-Left
+
+8)Diagonally Down-Right: 1 Space Down-Right
+
+9)Return Move: Column Wrap around on opposing last row
+
+Move Space
+There are a number of possible move ranges for a piece moving on the board using the movement rules that have been defined.
+
+Based on the location of the source move, we have a definite number of potential move spaces.
+
+We will enter the co-ordinates of the moves that will comprise the move space.
+
+RETURN MOVE
+
+The return move is a special kind of move that only happens on opposing starting rows
+
+For Red, it means they need to have a stack on row 6.
+For Blue, it means they need to have a stack on row 1.
+
+Blue Return Move
+->Left Corner Move
+
+@ X
+X X
+| |
+v v
+1 2
+
+1:{A6} 2:{B6}
+
+->Right Corner
+
+X @
+X X
+| |
+v v
+1 2
+1:{E6} 2:{F6}
+
+->General Edge Move
+1 2 3
+^ ^ ^
+| | |
+X X X
+X @	X
+
+1:[x-1][y=6]
+2:[x][y=6]
+3:[x+1][y=6]
+
+Red Return Move
+
+->Left Corner Move
+1 2
+^ ^
+| |
+X X
+@ X
+
+1:{A1}
+2:{B1}
+
+->Right Corner
+
+1 2
+^ ^
+| |
+X X
+X @
+1:{F1}
+2:{E1}
+
+->General Edge Move
+
+X X X
+X @	X
+| | |
+v v v
+1 2 3
+
+1:[x-1][y=1]
+2:[x][y=1]
+3:[x+1][y=1]
+
+Regardless of the move space, it must be an empty space for the move to be considered valid. You will add the moves to list and compare each of the list moves against the destination move. 
+
+If you find the move in the list, it is valid otherwise it is NOT.
+
+NOT: Illegal Move
+/////////////////////////////////////////////////////////////////////
+
+Otherwise, consider these moves
+
+///GENERAL PURPOSE MOVES
+
+General Case: The move source is at least 1 space away from all edges 
+of the board
+-->Check for other cases first -->if not them, then this
+->Some space on the board that is not the bottom 2 cases.
+
+There are 8 possible moves to consider in the space
+1 2 3
+4 @ 5 -> Possible move option indicated by the O where @ is the source
+6 7 8
+
+[x][y]:@
+1:[x-1][y-1]						5:[x+1][y]
+2:[x][y-1]							6:[x-1][y+1]
+3:[x+1][y-1]						7:[x][y+1]
+4:[x-1][y]							8:[x+1][y+1]
+
+Calculate all of these moves and store them in an array perhaps
+and then compare the destination move to the list.
+
+If the move is in the list, it is valid.
+
+NOT: Illegal Move Error
+
+Corner Case: The move source is one of the 4 corners
+->Top Left Corner
+-->[0][0]{A1}
+
+@ 1 
+2 3
+
+[x][y]:@
+1:[x+1][y] {B1}
+2:[x][y+1] {A2}
+3:[x+1][y+1] {B2}
+
+->Top Right Corner
+-->[5][0]{F1}
+
+1 @
+2 3
+
+[x][y]:@
+1:[x-1][y] {E1}
+2:[x-1][y+1] {E2}
+3:[x][y+1] {F2}
+
+->Bottom Left Corner
+-->[5][0]{A5}
+
+1 2
+@ 3
+
+[x][y]:@
+1:[x][y-1] {A5}
+2:[x+1][y-1] {B5}
+3:[x+1][y] {B6}
+
+->Bottom Right Corner
+-->[5][5] {F5}
+
+2 3
+1 @
+
+[x][y]:@
+1:[x-1][y] {E6}
+2:[x-1][y-1] {E5}
+3:[x][y-1] {F5}
+
+If the move is in the list, it is valid.
+
+NOT: Illegal Move Error
+
+Edge Case: the move source is on one of the 4 edges.
+->Top Edge
+
+1 @ 2
+3 4 5
+
+[x][y]:@
+1:[x-1][y]
+2:[x+1][y] 
+3:[x-1][y+1]
+4:[x][y+1]
+5:[x+1][y+1]
+
+->Bottom Edge
+
+2 3 4
+1 @ 5
+
+[x][y]:@
+1:[x-1][y]
+2:[x-1][y-1] 
+3:[x][y-1]
+4:[x+1][y-1]
+5:[x+1][y]
+
+->Left Edge
+1 2
+@ 3
+4 5
+
+[x][y]:@
+1:[x][y-1]
+2:[x+1][y-1] 
+3:[x+1][y]
+4:[x][y+1]
+5:[x+1][y+1]
+
+->Right Edge
+
+2 1
+3 @
+4 5
+
+[x][y]:@
+1:[x][y-1]
+2:[x-1][y-1] 
+3:[x-1][y]
+4:[x+1][y-1]
+5:[x][y+1]
+
+Check what the source space refers to, one of these cases, and then fill an array with the spaces listed above around the source. 
+
+To be valid, the destination must refer to one of those spaces.
+
+NOT: Illegal Move 
+
+
+4. We now consider the type of move being made.
+So we will retrieve the contents of the cell referred to be Destination to examine it.
+
+There are only 2 kinds valid moves: Moving to an Empty Cell and Performing a Capture
+
+
+1) Moving to Empty Space
+->The move is to an empty space, denoted -.
+
+2) Capture Move
+The move requires 2 conditions to be valid
+
+->The destination refers to an enemy position
+->The Stack being replaced conforms to the capture rule specifications
+	
+	->3 can capture 2 
+	->2 can capture 1
+	->1 can capture 3
+
+If it is a valid capture, we will make use of the completeCapture() method to actually transfer the piece to the new position.
+
+NOT: Illegal Move Error
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Now that the move has been processed, we will enable the opponent's side and disable our own to wait for them to repeat the process.
+
+
+
