@@ -1,0 +1,427 @@
+Old Validation Protocol
+
+
+/*The validateMove has a very important function. It is to determine if the game can still be played and if the move made by the player constitutes a valid move within the game rules.
+        There are several layers to this->each will be described separately.
+        */
+        /*Layer 1
+        Valid 
+
+        */
+        /*Layer 2
+        Moving pieces that belong to your side.
+        */
+        //return 1 indicates You may only move pieces of your side.
+        
+        if (src.endsWith("R")==true)
+        {
+            int r,c;
+            c=translateCol(src);
+            r=Integer.parseInt(src.substring(1,2));
+            String tmp=getCell(r-1, c);
+            if (tmp.equals("-")||tmp.charAt(3)!='R')
+            {
+                return 1;
+            }
+        } else
+        
+        if (src.endsWith("B")==true)
+        {
+            int r,c;
+            c=translateCol(src);
+            r=Integer.parseInt(src.substring(1,2));
+            String tmp=getCell(r-1, c);
+            if (tmp.equals("-")||tmp.charAt(3)!='B')
+            {
+                return 1;
+            }
+        }
+        
+        
+        /*Layer 3
+        Layer 3 refers to the move space. This is the defined total set of possible 
+        moves based on the current location of the piece.
+        
+        1)Up Move: 1 Space Up
+
+2)Down Move: 1 Space Down
+
+3)Left Move: 1 Space to the Left
+
+4)Right Move: 1 Space to the Right
+
+5)Diagonally Up-Left: 1 Space Up-Left
+
+6)Diagonally Up-Right: 1 Space Up-Right
+
+7)Diagonally Down-Left: 1 Space Down-Left
+
+8)Diagonally Down-Right: 1 Space Down-Right
+
+9)Return Move: Column Wrap around on opposing last row
+        */
+        
+       //We process return moves first then normal moves. 
+       ////////////////////////////////////////////////////////////////////////////
+       /*Check Logic
+       We first check if the source move refers to the opposing last row for blue and red.
+       ->If so, we then determine where the move is located: either corner or general edge
+       ->In either case(s), we compile a list of moves that are possible from that position
+       ->We then see if the dest move refers to the a move from that list.
+       ->it is valid if it does, otherwise it is not
+       ->[*A special check is needed to ensure that the matching move in the move list refers to an empty space.]
+       ->We then process the non-return move in the same way
+       
+       
+       */
+       ///Return Move///
+       //Blue Return Move
+       ArrayList<String> moveSet=new ArrayList<>();
+       
+       if (src.endsWith("B") &&src.charAt(1)=='1' && dest.charAt(1)=='6')
+       {
+           //Left Corner Case
+           if (src.startsWith("A"))
+            {
+           moveSet.clear();
+           moveSet.add(0,"A6");
+           moveSet.add(0,"B6");
+           
+           if (moveSet.contains(dest))
+           {
+               if ((getCell(Integer.parseInt(dest.substring(1))-1,translateCol(dest.substring(0,1))).equals("-")==false))
+               {
+                   return 2;
+                   //2 indicates that the return move failed.
+               }else 
+                                {
+                                    //Do MOVE
+                                }
+           } else 
+                {
+                    return 3;
+                    ///3 means an invalid move was selected.
+                }
+           } else if (src.startsWith("F"))
+           //Right Corner Case
+           {
+           moveSet.clear();
+           moveSet.add(0,"E6");
+           moveSet.add(0,"F6");
+           
+           if (moveSet.contains(dest))
+           {
+              if ((getCell(Integer.parseInt(dest.substring(1))-1,translateCol(dest.substring(0,1))).equals("-")==false))
+               {
+                   return 2;
+                   //2 indicates that the return move failed.
+               }else 
+                                {
+                                    //Do MOVE
+                                }
+           } else 
+                {
+                    return 3;
+                    ///3 means an invalid move was selected.
+                }
+           } else if(src.length()>1)
+            {           //General Edge Case
+                String xLeft="",xRight="",y="6";
+                switch (src.substring(0, 1))
+                {
+                    case "B":
+                    {
+                        xLeft="A";
+                        xRight="C";
+                    }
+                        break;
+                    case "C":
+                    {
+                        xLeft="B";
+                        xRight="D";
+
+                    }
+                        break;
+                    case "D":
+                    {
+                        xLeft="C";
+                        xRight="E";
+
+                    }
+                        break;
+                    case "E":
+                    {
+                        xLeft="D";
+                        xRight="F";
+
+                    }
+                        break;
+                    
+                }
+                moveSet.clear();
+                moveSet.add(xLeft+y);
+                moveSet.add(xRight+y);
+                moveSet.add(src.substring(0, 1)+y);
+                
+                if (moveSet.contains(dest))
+                        {
+                        if ((getCell(Integer.parseInt(dest.substring(1))-1,translateCol(dest.substring(0,1))).equals("-")==false))
+                            {
+                               return 2;
+                   //2 indicates that the return move failed.
+                           } else 
+                                {
+                                    //Do MOVE
+                                }
+                        
+                        } else 
+                            {
+                                return 3;
+                    ///3 means an invalid move was selected.
+                            }
+            }else 
+                {
+                    return 1;
+                }
+           
+
+       } else if (src.endsWith("R") &&src.charAt(1)=='6' && dest.charAt(1)=='1')
+        //Red Return Move
+    
+       {
+             //Left Corner Case
+           if (src.startsWith("A"))
+            {
+                moveSet.clear();
+           moveSet.add(0,"A1");
+           moveSet.add(0,"B1");
+           
+           if (moveSet.contains(dest))
+           {
+               if ((getCell(Integer.parseInt(dest.substring(1))-1,translateCol(dest.substring(0,1))).equals("-")==false))
+               {
+                   return 2;
+                   //2 indicates that the return move failed.
+               }else 
+                                {
+                                    //Do MOVE
+                                }
+           } else 
+                {
+                    return 3;
+                    ///3 means an invalid move was selected.
+                }
+           } else if (src.startsWith("F"))
+           //Right Corner Case
+           {
+               moveSet.clear();
+           moveSet.add(0,"E1");
+           moveSet.add(0,"F1");
+           
+           if (moveSet.contains(dest))
+           {
+              if ((getCell(Integer.parseInt(dest.substring(1))-1,translateCol(dest.substring(0,1))).equals("-")==false))
+               {
+                   return 2;
+                   //2 indicates that the return move failed.
+               }else 
+                                {
+                                    //Do MOVE
+                                }
+           } else 
+                {
+                    return 3;
+                    ///3 means an invalid move was selected.
+                }
+           } else if(src.length()>1)
+            {           //General Edge Case
+                String xLeft="",xRight="",y="1";
+                switch (src.substring(0, 1))
+                {
+                    case "B":
+                    {
+                        xLeft="A";
+                        xRight="C";
+                    }
+                        break;
+                    case "C":
+                    {
+                        xLeft="B";
+                        xRight="D";
+
+                    }
+                        break;
+                    case "D":
+                    {
+                        xLeft="C";
+                        xRight="E";
+
+                    }
+                        break;
+                    case "E":
+                    {
+                        xLeft="D";
+                        xRight="F";
+
+                    }
+                        break;
+                    
+                }
+                moveSet.clear();
+                moveSet.add(xLeft+y);
+                moveSet.add(xRight+y);
+                moveSet.add(src.substring(0, 1)+y);
+                
+                if (moveSet.contains(dest))
+                        {
+                        if ((getCell(Integer.parseInt(dest.substring(1))-1,translateCol(dest.substring(0,1))).equals("-")==false))
+                            {
+                               return 2;
+                   //2 indicates that the return move failed.
+                           } else 
+                                {
+                                    //Do MOVE
+                                }
+                        
+                        } else 
+                            {
+                                return 3;
+                    ///3 means an invalid move was selected.
+                            }
+            }else 
+                {
+                    return 1;
+                }
+           
+
+ 
+       } else 
+       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+       ///Corner Cases
+       /*
+       This refers to a move that is conducted such that the source move is in a corner but the destination move is not one that is a Return move
+       Source Move Locations and therefore checks for
+       Top Left     -->[0][0]{A1}
+       Top Right    -->[5][0]{F1}
+       Bottom Left  -->[5][0]{A5}
+       Bottom Right -->[5][5] {F5}
+ 
+       */
+       if (src.startsWith("A")&&(src.charAt(1)=='1'))
+       {
+           moveSet.clear();
+           
+           moveSet.add("B1");
+           moveSet.add("A2");
+           moveSet.add("B2");
+            
+           if (moveSet.contains(dest))
+                        {
+                        if ((getCell(Integer.parseInt(dest.substring(1))-1,translateCol(dest.substring(0,1))).equals("-")==false))
+                            {
+                               return 2;
+                   //2 indicates that the return move failed.
+                           } else 
+                                {
+                                    //Do MOVE
+                                }
+                        
+                        } else 
+                            {
+                                return 3;
+                    ///3 means an invalid move was selected.
+                            }
+           
+       } else 
+           if (src.startsWith("F")&&(src.charAt(1)=='1'))
+            {
+                   moveSet.clear();
+           
+                    moveSet.add("E1");
+                    moveSet.add("E2");
+                   moveSet.add("F2");
+            
+           if (moveSet.contains(dest))
+                        {
+                        if ((getCell(Integer.parseInt(dest.substring(1))-1,translateCol(dest.substring(0,1))).equals("-")==false))
+                            {
+                               return 2;
+                   //2 indicates that the return move failed.
+                           } else 
+                                {
+                                    //Do MOVE
+                                }
+                        
+                        } else 
+                            {
+                                return 3;
+                    ///3 means an invalid move was selected.
+                            }
+                
+            } else
+                if (src.startsWith("A")&&(src.charAt(1)=='5'))
+                {
+                       moveSet.clear();
+           
+           moveSet.add("A5");
+           moveSet.add("B5");
+           moveSet.add("B6");
+            
+           if (moveSet.contains(dest))
+                        {
+                        if ((getCell(Integer.parseInt(dest.substring(1))-1,translateCol(dest.substring(0,1))).equals("-")==false))
+                            {
+                               return 2;
+                   //2 indicates that the return move failed.
+                           } else 
+                                {
+                                    //Do MOVE
+                                }
+                        
+                        } else 
+                            {
+                                return 3;
+                    ///3 means an invalid move was selected.
+                            }
+                    
+                } else 
+                    if (src.startsWith("F")&&(src.charAt(1)=='5'))
+                    {
+                           moveSet.clear();
+           
+           moveSet.add("E6");
+           moveSet.add("E5");
+           moveSet.add("F5");
+            
+           if (moveSet.contains(dest))
+                        {
+                        if ((getCell(Integer.parseInt(dest.substring(1))-1,translateCol(dest.substring(0,1))).equals("-")==false))
+                            {
+                               return 2;
+                   //2 indicates that the return move failed.
+                           } else 
+                                {
+                                    //Do MOVE
+                                }
+                        
+                        } else 
+                            {
+                                return 3;
+                    ///3 means an invalid move was selected.
+                            }
+                    } else 
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////                
+                        ////Edge Cases
+                        /*
+                        ->Top Edge
+                        ->Bottom Edge
+                        ->Left Edge
+                        ->Right Edge
+                        */
+                        if (src.charAt(1)=='1')
+                            {
+                                moveSet.clear();
+                            }
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /*Layer 4*/
+        return 0;
