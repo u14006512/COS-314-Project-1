@@ -1,5 +1,6 @@
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.swing.JComponent;
 
@@ -16,8 +17,8 @@ public class Game
 
     public int evalFunction(gameTreeNode node)
     {
-        
-        return 1;
+        Random n=new Random();
+        return n.nextInt(10)+1;
     }
     public boolean checkTerminal(gameTreeNode node)
     {
@@ -35,9 +36,9 @@ public class Game
         {
             for(int j=0;j<6;j++)
             {
-                if (getCell(i, j).contains(side))
+                if (state[i][j].contains(side))
                 {
-                    pieces.add(0,getCell(i,j)+";"+Integer.toString(j)+Integer.toString(i));
+                    pieces.add(0,state[i][j]+";"+Integer.toString(j)+Integer.toString(i));
                 }
             }
         }
@@ -46,17 +47,18 @@ public class Game
         for (int k=0;k<pieces.size();k++)
         {
             String temp=pieces.get(k).substring(pieces.get(k).indexOf(";")+1)+side;
-            String srcMove=reverseCol(Integer.parseInt(temp.substring(0,1)))+temp.substring(1);
+            int cT=Integer.parseInt(temp.substring(1,2));
+            String srcMove=reverseCol(Integer.parseInt(temp.substring(0,1)))+Integer.toString(cT+1)+side;
             ArrayList<moveNode>tmp=getMoveSet(srcMove);
   
             
             
             for(int m=0;m<tmp.size();m++)
             {
-                String moveTmp=reverseCol(tmp.get(m).y)+Integer.toString(tmp.get(m).x);
+                String moveTmp=reverseCol(tmp.get(m).y)+Integer.toString(tmp.get(m).x+1);
                 if (validateMove(srcMove, moveTmp)==0)
                 {
-                    destMoves.add(moveTmp+";"+srcMove+side);
+                    destMoves.add(moveTmp+";"+srcMove);
                     
                 }
             }
@@ -97,8 +99,9 @@ public class Game
             ArrayList<String> listMoves=generateChildren(node.containedState,maxSide);
             
             for(int u=0;u<listMoves.size();u++)
-            {
-            node.childrenStates.add(new gameTreeNode(listMoves.get(u),node.containedState,alpha,beta));
+            {gameTreeNode tmp=new gameTreeNode(listMoves.get(u),node.containedState,alpha,beta);
+            if (node.childrenStates.size()==0 || node.childrenStates.contains(tmp)==false)
+            node.childrenStates.add(tmp);
             node.childrenStates.get(u).setSrcMove(listMoves.get(u).substring(listMoves.get(u).indexOf(";")+1));
             node.v=Double.max(node.v, alphaBetaPruning(node.childrenStates.get(u), depth-1, node.a, node.b, false,team));
             node.a=Double.max(node.a, node.v);
@@ -475,13 +478,21 @@ public class Game
            
             ArrayList<moveNode> finalMoveSet=new ArrayList<>();
            for(int i=0;i<moveCoordinates.size();i++)
-           {
-                
-               
-               if((moveCoordinates.get(i).x>5 || moveCoordinates.get(i).x<0 || moveCoordinates.get(i).y>5 || moveCoordinates.get(i).y<0 )||(getCell(moveCoordinates.get(i).y,moveCoordinates.get(i).y)).equalsIgnoreCase(src.substring(src.length()-1)))
+           {/*
+            (Math.abs((moveCoordinates.get(i).y-row)) >1 
+               || Math.abs((moveCoordinates.get(i).x)-col) >1
+               ||(Math.abs((moveCoordinates.get(i).y-row)) >1 &&Math.abs((moveCoordinates.get(i).x)-col) >1)
+               ||moveCoordinates.get(i).x>5 
+               || moveCoordinates.get(i).x<0 
+               || moveCoordinates.get(i).y>5 
+               || moveCoordinates.get(i).y<0 
+               ||(getCell(moveCoordinates.get(i).x,moveCoordinates.get(i).y).toUpperCase().contains(src.substring(src.length()-1))))   
+               */
+              if((moveCoordinates.get(i).x<=5 && moveCoordinates.get(i).x>=0 ) && (moveCoordinates.get(i).y<=5 && moveCoordinates.get(i).y>=0 ) &&
+                      !(getCell(moveCoordinates.get(i).x,moveCoordinates.get(i).y).contains(src.substring(src.length()-1))))
                {
-                    
-               }else finalMoveSet.add(moveCoordinates.get(i));
+                    finalMoveSet.add(moveCoordinates.get(i));
+               } 
            } 
            
            
@@ -525,10 +536,18 @@ public class Game
            }
            
            ArrayList<moveNode> moveList=getMoveSet(src);
-        
+           
            destRow=Integer.parseInt(dest.substring(1))-1;
            destCol=translateCol(dest.substring(0,1));
            
+           int srcRow,srcCol;
+           srcRow=Integer.parseInt(src.substring(1,2))-1;
+           srcCol=translateCol(src.substring(0,1));
+           
+           if(move.endsWith("R") && srcRow==5 && (destRow!=4 || destRow!=0)) return 1;
+           if(move.endsWith("B") && srcRow==0 && (destRow!=5 || destRow!=1)) return 1;
+           if(Math.abs(destRow-srcRow)!=1 && Math.abs(destCol-srcCol)!=1) return 1;
+           if (moveList.size()==0) return 1;
            for(int i=0;i<moveList.size() && found==false;i++)
            {
            if (moveList.get(i).y==destCol && moveList.get(i).x==destRow )
@@ -555,6 +574,14 @@ public class Game
            destRow=Integer.parseInt(dest.substring(1))-1;
            destCol=translateCol(dest.substring(0,1));
            
+           int srcRow,srcCol;
+           srcRow=Integer.parseInt(src.substring(1,2))-1;
+           srcCol=translateCol(src.substring(0,1));
+           
+           if(move.endsWith("R") && srcRow==5 && (destRow!=4 || destRow!=0)) return 1;
+           if(move.endsWith("B") && srcRow==0 && (destRow!=5 || destRow!=1)) return 1;
+           if(Math.abs(destRow-srcRow)!=1 && Math.abs(destCol-srcCol)!=1) return 1;
+           if (moveList.size()==0) return 1;           
            for(int i=0;i<moveList.size() && found==false;i++)
            {
            if (moveList.get(i).y==destCol && moveList.get(i).x==destRow )
@@ -627,15 +654,27 @@ public String updateState(String src,String dest)
     String a,b;
     a=src;
     b=dest;
+    String val="";
     int srcR,srcC,destC,destR;
+    
+    if (dest.length()==6)
+    {
+    srcR=Integer.parseInt(b.substring(4,5))-1;
+    srcC=translateCol(b.substring(3,4));
+    
+    destR=Integer.parseInt(b.substring(1,2))-1;
+    destC=translateCol(b.substring(0,1));
+    } else {
+
     srcR=Integer.parseInt(a.substring(1,2))-1;
-    srcC=translateCol(src.substring(0,1));
+    srcC=translateCol(a.substring(0,1));
     
     destR=Integer.parseInt(b.substring(1))-1;
     destC=translateCol(b.substring(0,1));
     
-    String val=Integer.toString(srcR)+Integer.toString(srcC)+Integer.toString(destR)+Integer.toString(destC);
-    
+
+    }
+    val=Integer.toString(srcR)+Integer.toString(srcC)+Integer.toString(destR)+Integer.toString(destC);
     return val;
 }
 public void moveFunction(JComponent a,JComponent b)

@@ -2135,7 +2135,7 @@ public class GameInterface extends javax.swing.JFrame {
 
         }
         tmp=tmp.childrenStates.get(index);
-        
+        newGame.updateBoard(tmp.move.substring(3,5), tmp.move.substring(0,2));
         String move= newGame.updateState(tmp.srcMove, tmp.move);
                                     
                                          int srcR,srcC,destC,destR;
@@ -2163,8 +2163,9 @@ public class GameInterface extends javax.swing.JFrame {
 
                                         } else 
                                             {
-                                                aiMoveRed.setEnabled(false);
-                                                aiMoveBlue.setEnabled(true);
+                                                aiMoveBlue.setEnabled(false);
+                                                if (subRed.isEnabled()==false)subRed.setEnabled(true);
+                                                if (aiMoveRed.isEnabled()==false) aiMoveRed.setEnabled(true);
                                             }
     }//GEN-LAST:event_aiMoveBlueActionPerformed
 
@@ -2192,7 +2193,7 @@ public class GameInterface extends javax.swing.JFrame {
 
         }
         tmp=tmp.childrenStates.get(index);
-        
+                newGame.updateBoard(tmp.move.substring(3,5), tmp.move.substring(0,2));
         String move= newGame.updateState(tmp.srcMove, tmp.move);
                                     
                                          int srcR,srcC,destC,destR;
@@ -2218,7 +2219,12 @@ public class GameInterface extends javax.swing.JFrame {
                                         {
                                             JOptionPane.showMessageDialog(rootPane, "Huzzah! The Ai has won the game!");
 
-                                        }
+                                        }  else 
+                                            {
+                                                aiMoveRed.setEnabled(false);
+                                                if (subBlue.isEnabled()==false)subBlue.setEnabled(true);
+                                                if (aiMoveBlue.isEnabled()==false) aiMoveBlue.setEnabled(true);
+                                            }
         
     }//GEN-LAST:event_aiMoveRedActionPerformed
 
