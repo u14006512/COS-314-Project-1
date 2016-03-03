@@ -10,16 +10,136 @@ import javax.swing.JComponent;
  */
 public class Game 
 {
-    public String[][] getState()
+    public static int eval1=1,eval2=1;
+    public static int depth=1;
+    public static int depthSecond=1;
+    public double materialAnalysis(String[][] gameState)
     {
-        return gameState;
-    }
+        double blueScore=0,redScore=0;
+        
+        blueScore=pieceCount(gameState, "B")+materialAdvan(gameState, "B");
+        redScore=pieceCount(gameState, "R")+materialAdvan(gameState, "R");
+        
 
-    public int evalFunction(gameTreeNode node)
-    {
-        Random n=new Random();
-        return n.nextInt(10)+1;
+        if(blueScore==redScore) return 0;
+        if(blueScore>redScore)return 1;
+        if(blueScore<redScore)return 2;
+        return 0;
     }
+    public double materialAdvan(String[][] gameState,String side)
+    {
+        double count=0;
+        double one=0,two=0,three=0,o1=0,o2=0,o3=0;
+        String target="";
+        if(side=="R")target="B"; else target="R";
+     for(int x=0;x<6;x++)
+     {
+         for(int y=0;y<6;y++)
+         {
+             if(gameState[x][y].contains(side))
+             {
+                 switch(gameState[x][y].substring(0,1))
+                 {
+                     case "1":
+                         one++;
+                        break;
+                     case "2":
+                         two++;
+                         break;
+                     case "3":
+                         three++;
+                         break;
+                 }
+             } else if (gameState[x][y].contains(target))
+                {
+                  switch(gameState[x][y].substring(0,1))
+                 {
+                     case "1":
+                         o1++;
+                        break;
+                     case "2":
+                         o2++;
+                         break;
+                     case "3":
+                         o3++;
+                         break;
+                 }  
+                }  
+         }
+     }
+     double a=0,b=0,c=0;
+     if ((one-o1)>0) a=one-o1;
+     if ((two-o2)>0) a=two-o2;
+     if ((three-o3)>0) a=three-o3;
+     return a+b+c;
+    }
+    public double pieceCount(String[][] gamestate,String side)
+    {
+            double count=0;
+     double val=0;
+     for(int x=0;x<6;x++)
+     {
+         for(int y=0;y<6;y++)
+         {
+             if(gameState[x][y].contains(side))
+             {
+                 count++;
+             }  
+         }
+     }
+        
+        return count;
+    }
+    public double evalFunction2(gameTreeNode node,int team)
+    {
+        evalFunctionSet a=new evalFunctionSet();
+        Random n=new Random(System.nanoTime());
+        switch (eval2) {
+            case 1:
+                ///Random AI
+                return n.nextInt(10); 
+            case 2:
+                ////Basic AI
+                
+                return a.goodEval(node.containedState, team);
+            //case 3:
+                //Good AI
+            //    return a.AdvancedEval(node.containedState, team);
+            default: 
+                return n.nextInt(10);
+        }
+    }
+    public double evalFunction(gameTreeNode node,int team)
+    {
+        evalFunctionSet a=new evalFunctionSet();
+                        
+        Random n=new Random(System.nanoTime());
+
+        switch (eval1) {
+            case 1:
+                ///Random AI
+                return n.nextInt(10);
+            case 2:
+                ////Basic AI
+                return a.goodEval(node.containedState,team);
+            //case 3:
+                //Good AI
+             //   return a.AdvancedEval(node.containedState,team);
+            default: 
+                return n.nextInt(10);
+        } 
+        
+    }
+    public int getD2(){return depthSecond;}
+    public void setDepth2(int a){depthSecond=a;}
+    public void setDepth(int a){depth=a;}
+    public void setEval(int a){eval1=a;}
+    public void setEval2(int a){eval2=a;}
+    public int getEval1(){return eval1;}
+    public int getEval2(){return eval2;}
+    public String[][] getState(){return gameState;}
+    public int getD(){return depth;}
+    
     public boolean checkTerminal(gameTreeNode node)
     {
         
@@ -72,7 +192,7 @@ public class Game
         return destMoves;
     } 
     
-    public double alphaBetaPruning(gameTreeNode node,int depth, double alpha, double beta, boolean max,int team)
+    public double alphaBetaPruning(gameTreeNode node,int depth, double alpha, double beta, boolean max,int team,int ai)
     {
         String maxSide="",minSide="";
         if (team==0) 
@@ -85,7 +205,8 @@ public class Game
                 minSide="B";
             }
         
-        if(depth==0 || (checkTerminal(node))==true) return evalFunction(node);
+        if(ai==0 && (depth==0 || (checkTerminal(node))==true)) return evalFunction(node,team); else
+        if(ai==1 && (depth==0 || (checkTerminal(node))==true)) return evalFunction2(node,team);
         if(max)
         {
             /*
@@ -97,29 +218,50 @@ public class Game
             node.v=Double.NEGATIVE_INFINITY;
   
             ArrayList<String> listMoves=generateChildren(node.containedState,maxSide);
-            
-            for(int u=0;u<listMoves.size();u++)
-            {gameTreeNode tmp=new gameTreeNode(listMoves.get(u),node.containedState,alpha,beta);
-            if (node.childrenStates.size()==0 || node.childrenStates.contains(tmp)==false)
+                        boolean b=false;
+            for(int u=0;u<listMoves.size()&& b==false;u++){
+                b=false;
+                gameTreeNode tmp=new gameTreeNode(listMoves.get(u),node.containedState,alpha,beta);
+            if (node.childrenStates.isEmpty() || node.childrenStates.contains(tmp)==false ||tmp.containedState!=node.containedState)
             node.childrenStates.add(tmp);
             node.childrenStates.get(u).setSrcMove(listMoves.get(u).substring(listMoves.get(u).indexOf(";")+1));
-            node.v=Double.max(node.v, alphaBetaPruning(node.childrenStates.get(u), depth-1, node.a, node.b, false,team));
+            node.v=Double.max(node.v, alphaBetaPruning(node.childrenStates.get(u), depth-1, node.a, node.b, false,team,ai));
             node.a=Double.max(node.a, node.v);
             
             if (node.b<=node.a)
                 {
+
+                                    b=true;
+                   /// node.childrenStates=(ArrayList<gameTreeNode>) node.childrenStates.subList(0, u+1); 
                     for(int i=u;i<node.childrenStates.size();i++)
                     {
                     node.childrenStates.remove(i);
                     }
-                break;    
+                                    break;/*
+                                                       ArrayList<gameTreeNode> tmpList=new ArrayList<>();
+                    tmpList=(ArrayList<gameTreeNode>) node.childrenStates.subList(0, u+1);
+                    node.childrenStates.clear();
+                    node.childrenStates=tmpList;
+
+
+
+                                                       */
+                    
+
                 }
+            if (b==true){
+                for(int i=u;i<node.childrenStates.size();i++)
+                    {
+                    node.childrenStates.remove(i);
+                    }
+                break;}
             }
         return node.v;
         
         }else 
             {
-                        /*
+            boolean b=false;
+            /*
             childList=generateChildren(node.state, "R");
             node.childList=childList;
             
@@ -128,23 +270,46 @@ public class Game
              node.v=Double.POSITIVE_INFINITY;
             
            ArrayList<String> listMoves=generateChildren(node.containedState,minSide);
-            
-            for(int u=0;u<listMoves.size();u++)
+           
+            for(int u=0;u<listMoves.size() && b==false;u++)
             {
-            node.childrenStates.add(new gameTreeNode(listMoves.get(u),node.containedState,alpha,beta));
+                b=false;
+              gameTreeNode tmp=new gameTreeNode(listMoves.get(u),node.containedState,alpha,beta);
+            if (node.childrenStates.isEmpty() || node.childrenStates.contains(tmp)==false)  
+            node.childrenStates.add(tmp);
             
-            node.v=Double.min(node.v, alphaBetaPruning(node.childrenStates.get(u), depth-1, node.a, node.b, true,team));
+            node.v=Double.min(node.v, alphaBetaPruning(node.childrenStates.get(u), depth-1, node.a, node.b, true,team,ai));
             node.b=Double.min(node.b, node.v);
             
             if (node.b<=node.a)
-                {
+                {   b=true;
+                    
                     for(int i=u;i<node.childrenStates.size();i++)
                     {
                     node.childrenStates.remove(i);
                     }
-                break;    
+                                   break;
+                                   /*
+                   ArrayList<gameTreeNode> tmpList=new ArrayList<>();
+                    tmpList=(ArrayList<gameTreeNode>) node.childrenStates.subList(0, u+1);
+                    node.childrenStates.clear();
+                    node.childrenStates=tmpList;
+                                           for(int i=u;i<node.childrenStates.size();i++)
+                    {
+                    node.childrenStates.remove(i);
+                    }
+            
+                    }*/
+                
                 }
+                if(b==true){ 
+                    for(int i=u;i<node.childrenStates.size();i++)
+                    {
+                    node.childrenStates.remove(i);
+                    }
+                    break;}
             }
+          
         return node.v;
         }     
     }

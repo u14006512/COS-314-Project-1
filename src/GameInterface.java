@@ -1,8 +1,15 @@
 
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.Timer;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -15,22 +22,194 @@ import javax.swing.JPanel;
  * @author Emilio Singh u14006512
  */
 public class GameInterface extends javax.swing.JFrame {
-
+        boolean hva=false;
         Game newGame=new Game();
         private JPanel[][] gameBoard=new JPanel[6][6];
-
+     
     /**
      * Creates new form GameInterface
      */
-    public void initialiseBoard()
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void aRMove()
     {
+            
+       gameTreeNode rootNode=new gameTreeNode("Root",newGame.getState(),Double.NEGATIVE_INFINITY,Double.POSITIVE_INFINITY);
+       int dd=newGame.getD2();
+       newGame.alphaBetaPruning(rootNode,dd, rootNode.a,rootNode.b, true,1,1);
+        int index=-1;
+        double max=-1;
+        boolean found=false;
+        gameTreeNode tmp=rootNode;
         
+        
+        for(int j=0;j<tmp.childrenStates.size() && found==false;j++)
+        {
+        
+            if(tmp.childrenStates.get(j).v>max)
+            {
+                max=tmp.childrenStates.get(j).v;
+                index=j;
+                
+            
+            }
+
+        }
+                                                boolean gameWon=newGame.gameWon(newGame.getState());
+                                        if (gameWon==true)
+                                        {
+                                            JOptionPane.showMessageDialog(rootPane, "Huzzah! Red Ai has won the game! ");
+                                                        subBlue.setEnabled(false);
+                                                        subRed.setEnabled(false);
+                                                        aiMoveBlue.setEnabled(false);
+                                                        aiMoveBlue.setEnabled(false);
+                                            int choice=JOptionPane.showConfirmDialog(rootPane,"Would you like to play a new game?", "New Game", JOptionPane.OK_CANCEL_OPTION,0);
+                                            if (choice==0){startNewGame();}else System.exit(0);
+                                        }  else 
+                                            {                                             
+                                                if(index!=-1 && tmp.childrenStates!=null){
+                                         tmp=tmp.childrenStates.get(index);
+                                         newGame.updateBoard(tmp.move.substring(3,5), tmp.move.substring(0,2));
+                                         String move= newGame.updateState(tmp.srcMove, tmp.move);
+                                    
+                                         int srcR,srcC,destC,destR;
+                                         srcR=Integer.parseInt(move.substring(0,1));
+                                         srcC=Integer.parseInt(move.substring(1,2));
+                                         destR=Integer.parseInt(move.substring(2,3));
+                                         destC=Integer.parseInt(move.substring(3));
+                                         JPanel s=gameBoard[srcR][srcC];
+                                         JPanel d=gameBoard[destR][destC];
+                                         
+                                         JComponent tmp1=(JComponent) s.getComponent(0);
+                                           s.setPreferredSize(s.getPreferredSize());
+                                           s.getComponent(0).setVisible(false);
+                                        if (d.getComponentCount()>0){
+                                            d.getComponent(0).setVisible(false);
+                                            d.removeAll();}
+                                         
+                                         d.add(tmp1);
+                                         d.getComponent(0).setVisible(true);
+                                        // d.getComponent(0).setVisible(true);
+
+                                            if(hva==true)
+                                            {
+                                                aiMoveRed.setEnabled(false);
+                                                subBlue.setEnabled(true);
+                                            } else {
+                                                aiMoveRed.setEnabled(false);
+                                                aiMoveBlue.setEnabled(true);
+                                                    }
+                                            }else   {
+                                                    double res=newGame.materialAnalysis(tmp.containedState);
+                                                    
+                                                    if(res==0){JOptionPane.showMessageDialog(rootPane, "Surprisingly, the game has ended in a draw! \n Neither side wins");}
+                                                    if(res==1){JOptionPane.showMessageDialog(rootPane, "Huzzah! The Blue AI has triumphed based on the material advantages on the board \n The Red AI's ability to win is no longer possible due: \n 1) to lack of sufficient pieces \n 2) lack of the right kind of pieces");}
+                                                    if(res==2){JOptionPane.showMessageDialog(rootPane, "Huzzah! The Red AI has triumphed based on the material advantages on the board \n The Blue AI's ability to win is no longer possible due: \n 1) to lack of sufficient pieces \n 2) lack of the right kind of pieces");}
+                                                    int choice=JOptionPane.showConfirmDialog(rootPane,"Would you like to play a new game?", "New Game", JOptionPane.OK_CANCEL_OPTION,0);
+                                                     if (choice==0){startNewGame();}else System.exit(0);
+                                                        subBlue.setEnabled(false);
+                                                        subRed.setEnabled(false);
+                                                        aiMoveBlue.setEnabled(false);
+                                                        aiMoveBlue.setEnabled(false);
+                                                    
+                                                }
+                                            }
+    }
+    public void aBMove()
+    {
+        gameTreeNode  rootNode=new gameTreeNode("Root",newGame.getState(),Double.NEGATIVE_INFINITY,Double.POSITIVE_INFINITY);
+      int dD=newGame.getD();
+      newGame.alphaBetaPruning(rootNode,dD , rootNode.a, rootNode.b, true,0,0);
+        
+                int index=-1;
+        double max=-1;
+        boolean found=false;
+        gameTreeNode tmp=rootNode;
+        
+        
+        for(int j=0;j<tmp.childrenStates.size() && found==false;j++)
+        {
+        
+            if(tmp.childrenStates.get(j).v>max)
+            {
+                max=tmp.childrenStates.get(j).v;
+                index=j;
+                
+            
+            }
+
+        }
+        boolean gameWon=newGame.gameWon(newGame.getState());
+         if (gameWon==true)
+                                        {
+                                            JOptionPane.showMessageDialog(rootPane, "Huzzah! Blue Ai has won the game!");
+                                            subBlue.setEnabled(false);
+                                            subRed.setEnabled(false);
+                                            aiMoveBlue.setEnabled(false);
+                                            aiMoveRed.setEnabled(false);
+                                            int choice=JOptionPane.showConfirmDialog(rootPane,"Would you like to play a new game?", "New Game", JOptionPane.OK_CANCEL_OPTION,0);
+                                            if (choice==0){startNewGame();}else System.exit(0);
+                                        } else 
+                                            {
+                                         if(index!=-1 && tmp.childrenStates!=null){
+                                         tmp=tmp.childrenStates.get(index);
+                                         newGame.updateBoard(tmp.move.substring(3,5), tmp.move.substring(0,2));
+                                         String move= newGame.updateState(tmp.srcMove, tmp.move);
+            
+                                         int srcR,srcC,destC,destR;
+                                         srcR=Integer.parseInt(move.substring(0,1));
+                                         srcC=Integer.parseInt(move.substring(1,2));
+                                         destR=Integer.parseInt(move.substring(2,3));
+                                         destC=Integer.parseInt(move.substring(3));
+                                         JPanel s=gameBoard[srcR][srcC];
+                                         JPanel d=gameBoard[destR][destC];
+                                         
+                                         JComponent tmp1=(JComponent) s.getComponent(0);
+                                          s.setPreferredSize(s.getPreferredSize());
+                                           s.getComponent(0).setVisible(false);
+                                        if (d.getComponentCount()>0){
+                                            d.getComponent(0).setVisible(false);
+                                            d.removeAll();}
+                                         
+                                         d.add(tmp1);
+                                         d.getComponent(0).setVisible(true);
+                                        // d.getComponent(0).setVisible(true);
+ 
+                                            if (hva==true)
+                                            {
+                                                aiMoveBlue.setEnabled(false);
+                                                subRed.setEnabled(true);
+                                            } else{
+                                                aiMoveBlue.setEnabled(false);
+                                                aiMoveRed.setEnabled(true);
+                                                    }
+                                            }else 
+                                                {
+                                                    double res=newGame.materialAnalysis(tmp.containedState);
+                                                    if(res==0){JOptionPane.showMessageDialog(rootPane, "Surprisingly, the game has ended in a draw! \n Neither side wins");}
+                                                    if(res==1){JOptionPane.showMessageDialog(rootPane, "Huzzah! The Blue AI has triumphed based on the material advantages on the board \n The Red AI's ability to win is no longer possible due: \n 1) to lack of sufficient pieces \n 2) lack of the right kind of pieces");}
+                                                    if(res==2){JOptionPane.showMessageDialog(rootPane, "Huzzah! The Red AI has triumphed based on the material advantages on the board \n The Blue AI's ability to win is no longer possible due: \n 1) to lack of sufficient pieces \n 2) lack of the right kind of pieces");}
+                                                    int choice=JOptionPane.showConfirmDialog(rootPane,"Would you like to play a new game?", "New Game", JOptionPane.OK_CANCEL_OPTION,0);
+                                                    if (choice==0){startNewGame();}else System.exit(0);
+                                                        subBlue.setEnabled(false);
+                                                        subRed.setEnabled(false);
+                                                        aiMoveBlue.setEnabled(false);
+                                                        aiMoveBlue.setEnabled(false);
+                                                  //JOptionPane.showMessageDialog(rootPane, "Huzzah! Red Ai has won the game! \n It has won owing to material superiority");
+                                                }
+                                            }
+    }
+    private void initialiseBoard()
+    {
+        gameBoard=new JPanel[6][6];
         for (int i=0;i<6;i++)
         {
             for(int j=0;j<6;j++)
             {
-        
+             
                 gameBoard[i][j]=new JPanel();
+                gameBoard[i][j].setMaximumSize(gameBoard[i][j].getSize());
+                gameBoard[i][j].setMinimumSize(gameBoard[i][j].getSize());
             }
         }  
         
@@ -77,11 +256,206 @@ public class GameInterface extends javax.swing.JFrame {
         gameBoard[5][3]=D6;
         gameBoard[5][4]=E6;
         gameBoard[5][5]=F6;
+        /////////////////////////////////////////////////////////////////////////////////////////
+        
+        for (int i=0;i<6;i++)
+        {
+            for(int j=0;j<6;j++)
+            {
+                gameBoard[i][j].setMaximumSize(gameBoard[i][j].getSize());
+                gameBoard[i][j].setMinimumSize(gameBoard[i][j].getSize());
+                gameBoard[i][j].setPreferredSize(gameBoard[i][j].getSize());
+                gameBoard[i][j].setSize(gameBoard[i][j].getPreferredSize());
+            }
+        }
+    }
+    
+
+    public void startNewGame()
+    {
+     try 
+    {
+    Runtime.getRuntime().exec("java -jar  dist/Trimok.jar");
+    System.exit(0);
+    } 
+     catch (IOException e) 
+    {
+    }
+    }
+
+    public void setupGame() throws InterruptedException
+    {
+        /*
+        This segment of code operates at the very start of the program. Once the application window has been created, and subsequently opened,
+        the game will present a dialog box to the user to indicate his player mode, HvH,HvAI or AIvAI. 
+        
+        The player cannot advance without selecting an option.
+        Once there, the game will randomly select a player to be Blue. Blue gets to have the first turn as per game convention.
+        The random chance is a base 50/50 selection.
+        */
+        
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        aiMoveBlue.setEnabled(false);
+        aiMoveRed.setEnabled(false);
+        subBlue.setEnabled(false);
+        subRed.setEnabled(false);
+        
+        setResizable(false);
+        Object options[]={"Human vs Human","Human vs AI","AI vs AI"};
+        int n=-1;
+        
+        
+        while (n<0 || n >2){
+        n=JOptionPane.showOptionDialog(rootPane, "Select your game mode", "Game Mode Selection", JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        int randomValue=new Random().nextInt(4);
+        if (n==0)
+        {
+
+        
+        if (randomValue<=2)
+            {
+            JOptionPane.showMessageDialog(rootPane, "You are the Blue Player");
+            JOptionPane.showMessageDialog(rootPane, "Your opponent is the Red Player");
+            subBlue.setEnabled(true);
+
+            subRed.setEnabled(true);
+            subRed.setEnabled(false);
+            } 
+                else 
+                {
+            JOptionPane.showMessageDialog(rootPane, "Your opponent is the Blue Player");
+            JOptionPane.showMessageDialog(rootPane, "You are the Red Player");
+            subBlue.setEnabled(true);
+            subRed.setEnabled(true);
+            subRed.setEnabled(false);
+                }
+        
+        }
+        else if (n==1) 
+            {
+                hva=true;
+            
+            JOptionPane.showMessageDialog(rootPane, "You are the Blue Player");
+            String h="";
+            try{
+            h=JOptionPane.showInputDialog("Please enter the depth you wish the RED AI to search at \n (number of plies)");
+            }
+            catch(NumberFormatException e)
+            {
+                newGame.setDepth2(2);
+            }
+            if (h.length()>0 &&Integer.parseInt(h)>0)
+            {
+                newGame.setDepth2(Integer.parseInt(h));
+            }
+            
+            try{
+            h=JOptionPane.showInputDialog("Please enter a selection for the evaluation function \n 1: Random \n 2: Basic \n 3: Advanced ");
+            }
+            catch(NumberFormatException e)
+            {
+                newGame.setEval2(1);
+            }
+            if (h.length()>0 && Integer.parseInt(h)>0)
+            {
+                newGame.setEval2(Integer.parseInt(h));
+            }
+            
+
+            subBlue.setEnabled(true);
+            subRed.setEnabled(false);
+            aiMoveRed.setEnabled(false);
+            redDest.setEnabled(false);
+            redSrc.setEnabled(false);
+            } 
+              else if (n==2)
+                {hva=false;
+
+            String h="";
+            try{
+            h=JOptionPane.showInputDialog("Please enter the depth you wish the AI 1 to search at \n (number of plies)");
+            }
+            catch(NumberFormatException e)
+            {
+                newGame.setDepth(2);
+            }
+            if (Integer.parseInt(h)>0)
+            {
+                newGame.setDepth(Integer.parseInt(h));
+            }
+            h="";
+            try{
+            h=JOptionPane.showInputDialog("Please enter the depth you wish the AI 2 to search at \n (number of plies)");
+            }
+            catch(NumberFormatException e)
+            {
+                newGame.setDepth2(2);
+            }
+            if (Integer.parseInt(h)>0)
+            {
+                newGame.setDepth2(Integer.parseInt(h));
+            }
+            h="";
+            try{
+            h=JOptionPane.showInputDialog("Please enter a selection for the evaluation function for AI 1 \n 1: Random \n 2: Basic \n 3: Advanced ");
+            }
+            catch( NumberFormatException e)
+            {
+                newGame.setEval(1);
+            }
+            if (h.length()>0 && Integer.parseInt(h)>0)
+                newGame.setEval(Integer.parseInt(h));
+            h="";    
+            try{
+            h=JOptionPane.showInputDialog("Please enter a selection for the evaluation function for AI 2 \n 1: Random \n 2: Basic \n 3: Advanced ");
+            }
+            catch(NumberFormatException e)
+            {
+                newGame.setEval2(1);
+            }
+            if (h.length()>0 && Integer.parseInt(h)>0)
+            {
+                newGame.setEval2(Integer.parseInt(h));
+            }
+            
+            int choice=1;            
+            try{
+            
+            choice=JOptionPane.showOptionDialog(rootPane, "Would you like to enable Auto Play?", "Auto Play", JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, 0);
+            }
+            catch(NumberFormatException e)
+            {
+                
+            }
+            JOptionPane.showMessageDialog(rootPane, "AI 1 is the Blue Player");
+            JOptionPane.showMessageDialog(rootPane, "AI 2 is the Red Player");
+            if (choice==0)
+            {
+                autoplay();
+            } else{
+                        
+                        
+                        aiMoveBlue.setEnabled(true);
+                        aiMoveRed.setEnabled(true);
+                        aiMoveRed.setEnabled(false);
+                        blueDest.setEnabled(false);
+                        blueSrc.setEnabled(false);
+                        subBlue.setEnabled(false);
+                        subRed.setEnabled(false);
+                        redDest.setEnabled(false);
+                        redSrc.setEnabled(false);       
+                    } 
+                  }  
+                }
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+        
     }
     public GameInterface() {
 
         initComponents();
-        initialiseBoard();
+        
+        
     }
 
     /**
@@ -95,6 +469,7 @@ public class GameInterface extends javax.swing.JFrame {
 
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
+        jPanel4 = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         E2 = new javax.swing.JPanel();
         R2D = new javax.swing.JPanel();
@@ -217,6 +592,17 @@ public class GameInterface extends javax.swing.JFrame {
             .addGap(0, 100, Short.MAX_VALUE)
         );
 
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 100, Short.MAX_VALUE)
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 100, Short.MAX_VALUE)
+        );
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(0, 0, 0));
         setBounds(new java.awt.Rectangle(0, 0, 1000, 500));
@@ -238,6 +624,8 @@ public class GameInterface extends javax.swing.JFrame {
         R2D.setBackground(new java.awt.Color(255, 0, 51));
         R2D.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         R2D.setToolTipText("2 Stack");
+        R2D.setMaximumSize(new java.awt.Dimension(34, 28));
+        R2D.setMinimumSize(new java.awt.Dimension(34, 28));
 
         javax.swing.GroupLayout R2DLayout = new javax.swing.GroupLayout(R2D);
         R2D.setLayout(R2DLayout);
@@ -274,6 +662,8 @@ public class GameInterface extends javax.swing.JFrame {
         B1B.setBackground(new java.awt.Color(0, 0, 255));
         B1B.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         B1B.setToolTipText("1 Stack");
+        B1B.setMaximumSize(new java.awt.Dimension(34, 14));
+        B1B.setMinimumSize(new java.awt.Dimension(34, 14));
 
         javax.swing.GroupLayout B1BLayout = new javax.swing.GroupLayout(B1B);
         B1B.setLayout(B1BLayout);
@@ -310,6 +700,8 @@ public class GameInterface extends javax.swing.JFrame {
         B3D.setBackground(new java.awt.Color(0, 0, 255));
         B3D.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         B3D.setToolTipText("3 Stack");
+        B3D.setMaximumSize(new java.awt.Dimension(34, 53));
+        B3D.setMinimumSize(new java.awt.Dimension(34, 53));
 
         javax.swing.GroupLayout B3DLayout = new javax.swing.GroupLayout(B3D);
         B3D.setLayout(B3DLayout);
@@ -346,6 +738,8 @@ public class GameInterface extends javax.swing.JFrame {
         R2A.setBackground(new java.awt.Color(255, 0, 51));
         R2A.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         R2A.setToolTipText("2 Stack");
+        R2A.setMaximumSize(new java.awt.Dimension(34, 28));
+        R2A.setMinimumSize(new java.awt.Dimension(24, 28));
 
         javax.swing.GroupLayout R2ALayout = new javax.swing.GroupLayout(R2A);
         R2A.setLayout(R2ALayout);
@@ -382,6 +776,8 @@ public class GameInterface extends javax.swing.JFrame {
         R3B.setBackground(new java.awt.Color(255, 0, 51));
         R3B.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         R3B.setToolTipText("3 Stack");
+        R3B.setMaximumSize(new java.awt.Dimension(34, 53));
+        R3B.setMinimumSize(new java.awt.Dimension(34, 53));
 
         javax.swing.GroupLayout R3BLayout = new javax.swing.GroupLayout(R3B);
         R3B.setLayout(R3BLayout);
@@ -418,6 +814,8 @@ public class GameInterface extends javax.swing.JFrame {
         R1A.setBackground(new java.awt.Color(255, 0, 51));
         R1A.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         R1A.setToolTipText("1 Stack");
+        R1A.setMaximumSize(new java.awt.Dimension(34, 14));
+        R1A.setMinimumSize(new java.awt.Dimension(34, 14));
 
         javax.swing.GroupLayout R1ALayout = new javax.swing.GroupLayout(R1A);
         R1A.setLayout(R1ALayout);
@@ -443,7 +841,7 @@ public class GameInterface extends javax.swing.JFrame {
             C1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, C1Layout.createSequentialGroup()
                 .addContainerGap(70, Short.MAX_VALUE)
-                .addComponent(R1A, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(R1A, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -469,6 +867,8 @@ public class GameInterface extends javax.swing.JFrame {
         R2B.setBackground(new java.awt.Color(255, 0, 51));
         R2B.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         R2B.setToolTipText("2 Stack");
+        R2B.setMaximumSize(new java.awt.Dimension(34, 28));
+        R2B.setMinimumSize(new java.awt.Dimension(34, 28));
 
         javax.swing.GroupLayout R2BLayout = new javax.swing.GroupLayout(R2B);
         R2B.setLayout(R2BLayout);
@@ -505,6 +905,8 @@ public class GameInterface extends javax.swing.JFrame {
         B3A.setBackground(new java.awt.Color(0, 0, 255));
         B3A.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         B3A.setToolTipText("3 Stack");
+        B3A.setMaximumSize(new java.awt.Dimension(34, 53));
+        B3A.setMinimumSize(new java.awt.Dimension(34, 53));
 
         javax.swing.GroupLayout B3ALayout = new javax.swing.GroupLayout(B3A);
         B3A.setLayout(B3ALayout);
@@ -546,6 +948,8 @@ public class GameInterface extends javax.swing.JFrame {
         R1D.setBackground(new java.awt.Color(255, 0, 51));
         R1D.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         R1D.setToolTipText("1 Stack");
+        R1D.setMaximumSize(new java.awt.Dimension(34, 14));
+        R1D.setMinimumSize(new java.awt.Dimension(34, 14));
 
         javax.swing.GroupLayout R1DLayout = new javax.swing.GroupLayout(R1D);
         R1D.setLayout(R1DLayout);
@@ -582,6 +986,9 @@ public class GameInterface extends javax.swing.JFrame {
         R3D.setBackground(new java.awt.Color(255, 0, 51));
         R3D.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         R3D.setToolTipText("3 Stack");
+        R3D.setMaximumSize(new java.awt.Dimension(34, 53));
+        R3D.setMinimumSize(new java.awt.Dimension(34, 53));
+        R3D.setName(""); // NOI18N
 
         javax.swing.GroupLayout R3DLayout = new javax.swing.GroupLayout(R3D);
         R3D.setLayout(R3DLayout);
@@ -618,6 +1025,9 @@ public class GameInterface extends javax.swing.JFrame {
         B3C.setBackground(new java.awt.Color(0, 0, 255));
         B3C.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         B3C.setToolTipText("3 Stack");
+        B3C.setMaximumSize(new java.awt.Dimension(34, 53));
+        B3C.setMinimumSize(new java.awt.Dimension(34, 53));
+        B3C.setName(""); // NOI18N
 
         javax.swing.GroupLayout B3CLayout = new javax.swing.GroupLayout(B3C);
         B3C.setLayout(B3CLayout);
@@ -654,6 +1064,8 @@ public class GameInterface extends javax.swing.JFrame {
         R3A.setBackground(new java.awt.Color(255, 0, 51));
         R3A.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         R3A.setToolTipText("3 Stack");
+        R3A.setMaximumSize(new java.awt.Dimension(34, 53));
+        R3A.setMinimumSize(new java.awt.Dimension(34, 53));
         R3A.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
             public void mouseDragged(java.awt.event.MouseEvent evt) {
                 R3AMouseDragged(evt);
@@ -700,6 +1112,8 @@ public class GameInterface extends javax.swing.JFrame {
         R2C.setBackground(new java.awt.Color(255, 0, 51));
         R2C.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         R2C.setToolTipText("2 Stack");
+        R2C.setMaximumSize(new java.awt.Dimension(34, 28));
+        R2C.setMinimumSize(new java.awt.Dimension(34, 28));
 
         javax.swing.GroupLayout R2CLayout = new javax.swing.GroupLayout(R2C);
         R2C.setLayout(R2CLayout);
@@ -736,6 +1150,8 @@ public class GameInterface extends javax.swing.JFrame {
         B2C.setBackground(new java.awt.Color(0, 0, 255));
         B2C.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         B2C.setToolTipText("2 Stack");
+        B2C.setMaximumSize(new java.awt.Dimension(34, 28));
+        B2C.setMinimumSize(new java.awt.Dimension(34, 28));
 
         javax.swing.GroupLayout B2CLayout = new javax.swing.GroupLayout(B2C);
         B2C.setLayout(B2CLayout);
@@ -772,6 +1188,9 @@ public class GameInterface extends javax.swing.JFrame {
         R1C.setBackground(new java.awt.Color(255, 0, 51));
         R1C.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         R1C.setToolTipText("1 Stack");
+        R1C.setMaximumSize(new java.awt.Dimension(34, 14));
+        R1C.setMinimumSize(new java.awt.Dimension(34, 14));
+        R1C.setName(""); // NOI18N
 
         javax.swing.GroupLayout R1CLayout = new javax.swing.GroupLayout(R1C);
         R1C.setLayout(R1CLayout);
@@ -808,6 +1227,8 @@ public class GameInterface extends javax.swing.JFrame {
         B1A.setBackground(new java.awt.Color(0, 0, 255));
         B1A.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         B1A.setToolTipText("1 Stack");
+        B1A.setMaximumSize(new java.awt.Dimension(34, 14));
+        B1A.setMinimumSize(new java.awt.Dimension(34, 14));
 
         javax.swing.GroupLayout B1ALayout = new javax.swing.GroupLayout(B1A);
         B1A.setLayout(B1ALayout);
@@ -859,6 +1280,8 @@ public class GameInterface extends javax.swing.JFrame {
         B3B.setBackground(new java.awt.Color(0, 0, 255));
         B3B.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         B3B.setToolTipText("3 Stack");
+        B3B.setMaximumSize(new java.awt.Dimension(34, 53));
+        B3B.setMinimumSize(new java.awt.Dimension(34, 53));
 
         javax.swing.GroupLayout B3BLayout = new javax.swing.GroupLayout(B3B);
         B3B.setLayout(B3BLayout);
@@ -895,6 +1318,8 @@ public class GameInterface extends javax.swing.JFrame {
         B2B.setBackground(new java.awt.Color(0, 0, 255));
         B2B.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         B2B.setToolTipText("2 Stack");
+        B2B.setMaximumSize(new java.awt.Dimension(34, 28));
+        B2B.setMinimumSize(new java.awt.Dimension(34, 28));
 
         javax.swing.GroupLayout B2BLayout = new javax.swing.GroupLayout(B2B);
         B2B.setLayout(B2BLayout);
@@ -976,6 +1401,8 @@ public class GameInterface extends javax.swing.JFrame {
         B2D.setBackground(new java.awt.Color(0, 0, 255));
         B2D.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         B2D.setToolTipText("2 Stack ");
+        B2D.setMaximumSize(new java.awt.Dimension(34, 28));
+        B2D.setMinimumSize(new java.awt.Dimension(34, 28));
 
         javax.swing.GroupLayout B2DLayout = new javax.swing.GroupLayout(B2D);
         B2D.setLayout(B2DLayout);
@@ -1023,10 +1450,13 @@ public class GameInterface extends javax.swing.JFrame {
         A2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         A2.setMaximumSize(new java.awt.Dimension(104, 104));
         A2.setMinimumSize(new java.awt.Dimension(104, 104));
+        A2.setPreferredSize(new java.awt.Dimension(104, 104));
 
         R3C.setBackground(new java.awt.Color(255, 0, 51));
         R3C.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         R3C.setToolTipText("3 Stack");
+        R3C.setMaximumSize(new java.awt.Dimension(34, 53));
+        R3C.setMinimumSize(new java.awt.Dimension(34, 53));
 
         javax.swing.GroupLayout R3CLayout = new javax.swing.GroupLayout(R3C);
         R3C.setLayout(R3CLayout);
@@ -1093,6 +1523,8 @@ public class GameInterface extends javax.swing.JFrame {
         B1C.setBackground(new java.awt.Color(0, 0, 255));
         B1C.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         B1C.setToolTipText("1 Stack");
+        B1C.setMaximumSize(new java.awt.Dimension(34, 14));
+        B1C.setMinimumSize(new java.awt.Dimension(34, 14));
 
         javax.swing.GroupLayout B1CLayout = new javax.swing.GroupLayout(B1C);
         B1C.setLayout(B1CLayout);
@@ -1109,10 +1541,10 @@ public class GameInterface extends javax.swing.JFrame {
         C6.setLayout(C6Layout);
         C6Layout.setHorizontalGroup(
             C6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(C6Layout.createSequentialGroup()
-                .addGap(31, 31, 31)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, C6Layout.createSequentialGroup()
+                .addContainerGap(36, Short.MAX_VALUE)
                 .addComponent(B1C, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(35, Short.MAX_VALUE))
+                .addGap(30, 30, 30))
         );
         C6Layout.setVerticalGroup(
             C6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1129,6 +1561,9 @@ public class GameInterface extends javax.swing.JFrame {
 
         B1D.setBackground(new java.awt.Color(0, 0, 255));
         B1D.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        B1D.setMaximumSize(new java.awt.Dimension(34, 14));
+        B1D.setMinimumSize(new java.awt.Dimension(34, 14));
+        B1D.setName(""); // NOI18N
 
         javax.swing.GroupLayout B1DLayout = new javax.swing.GroupLayout(B1D);
         B1D.setLayout(B1DLayout);
@@ -1180,6 +1615,8 @@ public class GameInterface extends javax.swing.JFrame {
         B2A.setBackground(new java.awt.Color(0, 0, 255));
         B2A.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         B2A.setToolTipText("2 Stack");
+        B2A.setMaximumSize(new java.awt.Dimension(34, 28));
+        B2A.setMinimumSize(new java.awt.Dimension(34, 28));
 
         javax.swing.GroupLayout B2ALayout = new javax.swing.GroupLayout(B2A);
         B2A.setLayout(B2ALayout);
@@ -1216,6 +1653,8 @@ public class GameInterface extends javax.swing.JFrame {
         R1B.setBackground(new java.awt.Color(255, 0, 51));
         R1B.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         R1B.setToolTipText("1 Stack");
+        R1B.setMaximumSize(new java.awt.Dimension(34, 14));
+        R1B.setMinimumSize(new java.awt.Dimension(34, 14));
 
         javax.swing.GroupLayout R1BLayout = new javax.swing.GroupLayout(R1B);
         R1B.setLayout(R1BLayout);
@@ -1703,61 +2142,57 @@ public class GameInterface extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(341, 341, 341)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(2, 2, 2)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel8)
-                                    .addComponent(jLabel10)))
-                            .addComponent(jLabel9)
-                            .addComponent(jLabel11))
-                        .addGap(0, 16, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
                         .addGap(23, 23, 23)
                         .addComponent(BluePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel12)
-                        .addGap(3, 3, 3))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 34, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(jLabel12)
+                                .addGap(3, 3, 3))
+                            .addComponent(jLabel11, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel10, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel9, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING)))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel13)))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(50, 50, 50)
-                        .addComponent(jLabel1)
-                        .addGap(101, 101, 101)
-                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 39, Short.MAX_VALUE)
+                        .addComponent(jLabel19)
                         .addGap(98, 98, 98)
-                        .addComponent(jLabel3)
-                        .addGap(103, 103, 103)
-                        .addComponent(jLabel4)
+                        .addComponent(jLabel20)
+                        .addGap(111, 111, 111)
+                        .addComponent(jLabel21)
                         .addGap(100, 100, 100)
-                        .addComponent(jLabel5)
-                        .addGap(88, 88, 88)
-                        .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jLabel22)
+                        .addGap(90, 90, 90)
+                        .addComponent(jLabel23)
+                        .addGap(98, 98, 98)
+                        .addComponent(jLabel24, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(108, 108, 108))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 30, Short.MAX_VALUE)
-                                .addComponent(jLabel19)
+                                .addGap(50, 50, 50)
+                                .addComponent(jLabel1)
+                                .addGap(101, 101, 101)
+                                .addComponent(jLabel2)
                                 .addGap(98, 98, 98)
-                                .addComponent(jLabel20)
-                                .addGap(111, 111, 111)
-                                .addComponent(jLabel21)
+                                .addComponent(jLabel3)
+                                .addGap(103, 103, 103)
+                                .addComponent(jLabel4)
                                 .addGap(100, 100, 100)
-                                .addComponent(jLabel22)
-                                .addGap(90, 90, 90)
-                                .addComponent(jLabel23)
-                                .addGap(98, 98, 98)
-                                .addComponent(jLabel24, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(108, 108, 108)))
-                        .addGap(34, 34, 34)
-                        .addComponent(RedPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
+                                .addComponent(jLabel5)
+                                .addGap(88, 88, 88)
+                                .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 25, Short.MAX_VALUE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 16, Short.MAX_VALUE)
+                .addComponent(RedPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(25, 25, 25))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1777,13 +2212,13 @@ public class GameInterface extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(61, 61, 61)
                         .addComponent(jLabel8)
-                        .addGap(83, 83, 83)
+                        .addGap(87, 87, 87)
                         .addComponent(jLabel9)
-                        .addGap(99, 99, 99)
+                        .addGap(95, 95, 95)
                         .addComponent(jLabel10)
-                        .addGap(88, 88, 88)
+                        .addGap(90, 90, 90)
                         .addComponent(jLabel11)
-                        .addGap(88, 88, 88)
+                        .addGap(86, 86, 86)
                         .addComponent(jLabel12)
                         .addGap(88, 88, 88)
                         .addComponent(jLabel13))
@@ -1792,9 +2227,9 @@ public class GameInterface extends javax.swing.JFrame {
                         .addComponent(BluePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(50, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
+                        .addContainerGap(33, Short.MAX_VALUE)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1804,7 +2239,10 @@ public class GameInterface extends javax.swing.JFrame {
                             .addComponent(jLabel21)
                             .addComponent(jLabel20)
                             .addComponent(jLabel19)))
-                    .addComponent(RedPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(31, 31, 31)
+                        .addComponent(RedPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addGap(36, 36, 36))
         );
 
@@ -1817,107 +2255,13 @@ public class GameInterface extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowActivated
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
-        /*
-        This segment of code operates at the very start of the program. Once the application window has been created, and subsequently opened,
-        the game will present a dialog box to the user to indicate his player mode, HvH,HvAI or AIvAI. 
-        
-        The player cannot advance without selecting an option.
-        Once there, the game will randomly select a player to be Blue. Blue gets to have the first turn as per game convention.
-        The random chance is a base 50/50 selection.
-        */
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        aiMoveBlue.setVisible(false);
-        aiMoveRed.setVisible(false);
-        subBlue.setVisible(false);
-        subRed.setVisible(false);
-        
-        setResizable(false);
-        Object options[]={"Human vs Human","Human vs AI","AI vs AI"};
-        int n=-1;
-        
-        
-        while (n<0 || n >2){
-        n=JOptionPane.showOptionDialog(rootPane, "Select your game mode", "Game Mode Selection", JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-        int randomValue=new Random().nextInt(4);
-        if (n==0)
-        {
-
-        
-        if (randomValue<=2)
-            {
-            JOptionPane.showMessageDialog(rootPane, "You are the Blue Player");
-            JOptionPane.showMessageDialog(rootPane, "Your opponent is the Red Player");
-            subBlue.setVisible(true);
-            subRed.setVisible(true);
-            subRed.setEnabled(false);
-            } 
-                else 
-                {
-            JOptionPane.showMessageDialog(rootPane, "Your opponent is the Blue Player");
-            JOptionPane.showMessageDialog(rootPane, "You are the Red Player");
-            subBlue.setVisible(true);
-            subRed.setVisible(true);
-            subRed.setEnabled(false);
-                }
-        
-        }
-        else if (n==1) 
-            {
-            if (randomValue<=2)
-            {
             
-            JOptionPane.showMessageDialog(rootPane, "You are the Blue Player");
-            subBlue.setVisible(true);
-            aiMoveRed.setVisible(true);
-            aiMoveRed.setEnabled(false);
-            redDest.setVisible(false);
-            redSrc.setVisible(false);
-            } 
-                else 
-                {
-            JOptionPane.showMessageDialog(rootPane, "You are the Red Player");
-            subRed.setVisible(true);
-            aiMoveBlue.setVisible(true);
-            subRed.setEnabled(false);
-            blueDest.setVisible(false);
-            blueSrc.setVisible(false);
-                }
-                
-            } else if (n==2)
-                {
-                    if (randomValue<=2)
-                    {
-                        
-                        JOptionPane.showMessageDialog(rootPane, "AI 1 is the Blue Player");
-                        JOptionPane.showMessageDialog(rootPane, "AI 2 is the Red Player");
-                        aiMoveBlue.setVisible(true);
-                        aiMoveRed.setVisible(true);
-                        aiMoveRed.setEnabled(false);
-                        blueDest.setVisible(false);
-                        blueSrc.setVisible(false);
-                        
-                        redDest.setVisible(false);
-                        redSrc.setVisible(false);       
-                    } 
-                        else 
-                        {
-                        
-                        JOptionPane.showMessageDialog(rootPane, "AI 1 is the Red Player");
-                        JOptionPane.showMessageDialog(rootPane, "AI 2 is the Blue Player");
-                        aiMoveBlue.setVisible(true);
-                        aiMoveRed.setVisible(true);
-                        aiMoveRed.setEnabled(false);
-                        blueDest.setVisible(false);
-                        blueSrc.setVisible(false);
-                        
-                        redDest.setVisible(false);
-                        redSrc.setVisible(false);
-                        }
-                } 
-        }
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
-            
+        initialiseBoard();
+            try {
+                setupGame();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(GameInterface.class.getName()).log(Level.SEVERE, null, ex);
+            }
     }//GEN-LAST:event_formWindowOpened
 
     private void R3AMouseDragged(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_R3AMouseDragged
@@ -1938,6 +2282,7 @@ public class GameInterface extends javax.swing.JFrame {
     }//GEN-LAST:event_F2MouseDragged
 
     private void subBlueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_subBlueActionPerformed
+                    
         if (newGame.checkForValidMoves(newGame.getState(),"B")==true){
         if (blueSrc.getText()==null || blueSrc.getText().equals(""))
             {
@@ -1963,12 +2308,17 @@ public class GameInterface extends javax.swing.JFrame {
                                     int result=-1;
                                     if ((result=newGame.validateMove(src, dest))==0)
                                     {
-                                   
+                    
+    
                                     blueDest.setText("");
                                     blueSrc.setText("");    
                                     subBlue.setEnabled(false);
+                                    if(hva==true){aiMoveRed.setEnabled(true);} else
+                                    {
+                                    redSrc.setEnabled(true);
+                                    redDest.setEnabled(true);    
                                     subRed.setEnabled(true);
-                                    if(aiMoveRed.isEnabled()==false && aiMoveRed.isVisible()==true) aiMoveRed.setEnabled(true);
+                                    }
                                     newGame.updateBoard(src, dest);
                                     
                                     String move= newGame.updateState(src, dest);
@@ -2001,6 +2351,8 @@ public class GameInterface extends javax.swing.JFrame {
                                             JOptionPane.showMessageDialog(rootPane, "Congratulations! You have won the game!");
                                             subBlue.setEnabled(false);
                                             subRed.setEnabled(false);
+                                            int choice=JOptionPane.showConfirmDialog(rootPane,"Would you like to play a new game?", "New Game", JOptionPane.OK_CANCEL_OPTION,0);
+                                            if (choice==0){startNewGame();}else System.exit(0);
                                         }
                                         
                                     } else 
@@ -2012,7 +2364,12 @@ public class GameInterface extends javax.swing.JFrame {
                                             }
                                         }
                                 }
-        } else JOptionPane.showMessageDialog(rootPane, "Sorry to say that you do not have any legal moves left. \n You lose the game!");
+        } else {
+            subBlue.setEnabled(false);
+            subRed.setEnabled(false);
+            JOptionPane.showMessageDialog(rootPane, "Sorry to say that you do not have any legal moves left. \n You lose the game!");}
+            int choice=JOptionPane.showConfirmDialog(rootPane,"Would you like to play a new game?", "New Game", JOptionPane.OK_CANCEL_OPTION,0);
+                                            if (choice==0){startNewGame();}else System.exit(0);
     }//GEN-LAST:event_subBlueActionPerformed
 
     private void redSrcActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_redSrcActionPerformed
@@ -2061,10 +2418,14 @@ public class GameInterface extends javax.swing.JFrame {
                                     {
                                    
                                     redDest.setText("");
-                                    redSrc.setText("");    
+                                    redSrc.setText("");   
+                                    
                                     subRed.setEnabled(false);
+                                    if(hva==true){aiMoveBlue.setEnabled(true);} else {
+                                    blueSrc.setEnabled(true);
+                                    blueDest.setEnabled(true);
                                     subBlue.setEnabled(true);
-                                    if(aiMoveBlue.isEnabled()==false && aiMoveBlue.isVisible()==true) aiMoveBlue.setEnabled(true);
+                                    }
                                     newGame.updateBoard(src, dest);
                                     
                                     String move= newGame.updateState(src, dest);
@@ -2093,11 +2454,9 @@ public class GameInterface extends javax.swing.JFrame {
                                             JOptionPane.showMessageDialog(rootPane, "Congratulations! You have won the game!");
                                             subBlue.setEnabled(false);
                                             subRed.setEnabled(false);
-                                        }else 
-                                            {
-                                                aiMoveRed.setEnabled(true);
-                                                    aiMoveBlue.setEnabled(false);
-                                            }
+                                            int choice=JOptionPane.showConfirmDialog(rootPane,"Would you like to play a new game?", "New Game", JOptionPane.OK_CANCEL_OPTION,0);
+                                            if (choice==0){startNewGame();}else System.exit(0);
+                                        }
                                     } else 
                                         {
                                             switch (result)
@@ -2107,124 +2466,24 @@ public class GameInterface extends javax.swing.JFrame {
                                             }
                                         }
                                 }
-                }else JOptionPane.showMessageDialog(rootPane, "Sorry to say that you do not have any legal moves left. \n You lose the game!"); 
+                }else {
+                    subBlue.setEnabled(false);
+                    subRed.setEnabled(false);
+                    JOptionPane.showMessageDialog(rootPane, "Sorry to say that you do not have any legal moves left. \n You lose the game!");
+                    
+                    int choice=JOptionPane.showConfirmDialog(rootPane, "Would you like to play a new game?");
+                                            if (choice==0){startNewGame();} else System.exit(0);
+                } 
     }//GEN-LAST:event_subRedActionPerformed
 
     private void aiMoveBlueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aiMoveBlueActionPerformed
         // TODO add your handling code here:
-
-      gameTreeNode  rootNode=new gameTreeNode("Root",newGame.getState(),Double.NEGATIVE_INFINITY,Double.POSITIVE_INFINITY);
-        newGame.alphaBetaPruning(rootNode, 2, rootNode.a, rootNode.b, true,0);
-        
-                int index=-1;
-        double max=-1;
-        boolean found=false;
-        gameTreeNode tmp=rootNode;
-        
-        
-        for(int j=0;j<tmp.childrenStates.size() && found==false;j++)
-        {
-        
-            if(tmp.childrenStates.get(j).v>max)
-            {
-                max=tmp.childrenStates.get(j).v;
-                index=j;
-                
-            
-            }
-
-        }
-        tmp=tmp.childrenStates.get(index);
-        newGame.updateBoard(tmp.move.substring(3,5), tmp.move.substring(0,2));
-        String move= newGame.updateState(tmp.srcMove, tmp.move);
-                                    
-                                         int srcR,srcC,destC,destR;
-                                         srcR=Integer.parseInt(move.substring(0,1));
-                                         srcC=Integer.parseInt(move.substring(1,2));
-                                         destR=Integer.parseInt(move.substring(2,3));
-                                         destC=Integer.parseInt(move.substring(3));
-                                         JPanel s=gameBoard[srcR][srcC];
-                                         JPanel d=gameBoard[destR][destC];
-                                         
-                                         JComponent tmp1=(JComponent) s.getComponent(0);
-                                           s.setPreferredSize(s.getPreferredSize());
-                                           s.getComponent(0).setVisible(false);
-                                        if (d.getComponentCount()>0){
-                                            d.getComponent(0).setVisible(false);
-                                            d.removeAll();}
-                                         
-                                         d.add(tmp1);
-                                         d.getComponent(0).setVisible(true);
-                                        // d.getComponent(0).setVisible(true);
-                                        boolean gameWon=newGame.gameWon(newGame.getState());
-                                        if (gameWon==true)
-                                        {
-                                            JOptionPane.showMessageDialog(rootPane, "Huzzah! The Ai has won the game!");
-
-                                        } else 
-                                            {
-                                                aiMoveBlue.setEnabled(false);
-                                                if (subRed.isEnabled()==false)subRed.setEnabled(true);
-                                                if (aiMoveRed.isEnabled()==false) aiMoveRed.setEnabled(true);
-                                            }
+        aBMove();
     }//GEN-LAST:event_aiMoveBlueActionPerformed
 
     private void aiMoveRedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aiMoveRedActionPerformed
         // TODO add your handling code here:
-
-       gameTreeNode rootNode=new gameTreeNode("Root",newGame.getState(),Double.NEGATIVE_INFINITY,Double.POSITIVE_INFINITY);
-        newGame.alphaBetaPruning(rootNode, 2, rootNode.a,rootNode.b, true,1);
-        int index=-1;
-        double max=-1;
-        boolean found=false;
-        gameTreeNode tmp=rootNode;
-        
-        
-        for(int j=0;j<tmp.childrenStates.size() && found==false;j++)
-        {
-        
-            if(tmp.childrenStates.get(j).v>max)
-            {
-                max=tmp.childrenStates.get(j).v;
-                index=j;
-                
-            
-            }
-
-        }
-        tmp=tmp.childrenStates.get(index);
-                newGame.updateBoard(tmp.move.substring(3,5), tmp.move.substring(0,2));
-        String move= newGame.updateState(tmp.srcMove, tmp.move);
-                                    
-                                         int srcR,srcC,destC,destR;
-                                         srcR=Integer.parseInt(move.substring(0,1));
-                                         srcC=Integer.parseInt(move.substring(1,2));
-                                         destR=Integer.parseInt(move.substring(2,3));
-                                         destC=Integer.parseInt(move.substring(3));
-                                         JPanel s=gameBoard[srcR][srcC];
-                                         JPanel d=gameBoard[destR][destC];
-                                         
-                                         JComponent tmp1=(JComponent) s.getComponent(0);
-                                           s.setPreferredSize(s.getPreferredSize());
-                                           s.getComponent(0).setVisible(false);
-                                        if (d.getComponentCount()>0){
-                                            d.getComponent(0).setVisible(false);
-                                            d.removeAll();}
-                                         
-                                         d.add(tmp1);
-                                         d.getComponent(0).setVisible(true);
-                                        // d.getComponent(0).setVisible(true);
-                                        boolean gameWon=newGame.gameWon(newGame.getState());
-                                        if (gameWon==true)
-                                        {
-                                            JOptionPane.showMessageDialog(rootPane, "Huzzah! The Ai has won the game!");
-
-                                        }  else 
-                                            {
-                                                aiMoveRed.setEnabled(false);
-                                                if (subBlue.isEnabled()==false)subBlue.setEnabled(true);
-                                                if (aiMoveBlue.isEnabled()==false) aiMoveBlue.setEnabled(true);
-                                            }
+    aRMove();
         
     }//GEN-LAST:event_aiMoveRedActionPerformed
 
@@ -2259,6 +2518,7 @@ public class GameInterface extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new GameInterface().setVisible(true);
+                
             }
         });
         
@@ -2358,9 +2618,22 @@ public class GameInterface extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JTextField redDest;
     private javax.swing.JTextField redSrc;
     private javax.swing.JButton subBlue;
     private javax.swing.JButton subRed;
     // End of variables declaration//GEN-END:variables
+
+    private void autoplay() throws InterruptedException
+    {
+        JOptionPane.showMessageDialog(rootPane, "Well, why the AIs fight it out, how is life treating you?");
+        
+        while(newGame.gameWon(newGame.getState())==false)
+        {
+            aBMove();
+            aRMove();
+                
+        }
+    }
 }
